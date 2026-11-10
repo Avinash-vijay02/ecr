@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Enchanted Coast · ECR Explorer</title>
+<meta name="description" content="A storybook map of East Coast Road, Chennai to Puducherry: sights, beaches, food spots and stays.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Baloo+Thambi+2:wght@600;800&family=Mukta:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#120e2e; --night2:#1d1748; --violet:#9b6bff; --aqua:#3fd6e0; --coral:#ff7a59; --gold:#ffc845;
+    --parch:#f6e7c1; --parch2:#e8cf96; --ink:#2a1d3d; --cream:#fffaf0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{background:var(--night)}
+  body{font-family:'Mukta',system-ui,sans-serif;color:var(--cream);min-height:100vh;
+    background:radial-gradient(ellipse at 50% 0%,#3a2a7a 0%,var(--night2) 35%,var(--night) 75%)}
+  .app{max-width:480px;margin:0 auto;position:relative;overflow:hidden;min-height:100vh}
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .stars i{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:tw 3s ease-in-out infinite}
+  @keyframes tw{0%,100%{opacity:.15}50%{opacity:1}}
+  .z{position:relative;z-index:1}
+
+  header{padding:26px 20px 10px;text-align:center;position:relative}
+  .moon{position:absolute;right:12px;top:10px;width:40px;height:40px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#fffbe6,#ffe08a 60%,#e6b64a);box-shadow:0 0 30px 8px rgba(255,214,120,.45);animation:float 6s ease-in-out infinite}
+  .moon::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(200,150,60,.35);left:14px;top:26px;box-shadow:16px -10px 0 -3px rgba(200,150,60,.3)}
+  @keyframes float{50%{transform:translateY(-8px)}}
+  .kicker{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  h1{font-family:'Cinzel Decorative',serif;font-weight:900;font-size:29px;line-height:1.05;margin:10px 0 4px;
+    background:linear-gradient(180deg,#fff6d8,#ffc845 70%,#e0912f);-webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 24px rgba(255,200,69,.25)}
+  .route{font-family:'Baloo Thambi 2';font-weight:600;font-size:15px;opacity:.9}
+  .route b{color:var(--aqua)}
+  .tamil{font-family:'Baloo Thambi 2';font-size:15px;opacity:.75;margin-top:2px}
+
+  .filters{display:flex;gap:8px;overflow-x:auto;padding:14px 14px 6px;scrollbar-width:none;position:sticky;top:0;z-index:5;
+    background:linear-gradient(180deg,rgba(18,14,46,.96) 70%,rgba(18,14,46,0))}
+  .filters::-webkit-scrollbar{display:none}
+  .chipf{flex:0 0 auto;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:var(--cream);
+    border-radius:22px;padding:7px 14px;font-family:'Baloo Thambi 2';font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s}
+  .chipf .dot{width:10px;height:10px;transform:rotate(45deg);border-radius:2px}
+  .chipf.on{background:var(--cream);color:var(--ink);border-color:var(--cream);box-shadow:0 0 14px rgba(255,250,240,.35)}
+  .chipf small{opacity:.6;font-weight:600}
+
+  .map-wrap{margin:6px 12px 0;border-radius:26px;overflow:hidden;position:relative;
+    border:3px solid #ffd77a;box-shadow:0 0 0 5px rgba(255,215,122,.15),0 0 40px rgba(155,107,255,.35)}
+  svg.map{display:block;width:100%;height:auto}
+  .hint{text-align:center;font-size:13px;margin:10px 0;opacity:.7}
+
+  /* svg anims */
+  .wv{stroke-dasharray:14 10;animation:flow 3s linear infinite}
+  .wv.s{animation-duration:4.5s}
+  @keyframes flow{to{stroke-dashoffset:-48}}
+  .spark{animation:tw 2.4s ease-in-out infinite}
+  .serp{animation:serp 5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes serp{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .balloon{animation:balloon 22s ease-in-out infinite}
+  @keyframes balloon{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-30px)}}
+  .lantern{animation:rise 9s linear infinite;opacity:0}
+  @keyframes rise{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-160px);opacity:0}}
+  .fish{animation:jump 4s ease-in-out infinite;transform-box:fill-box;transform-origin:center;opacity:0}
+  @keyframes jump{0%,60%{opacity:0;transform:translate(0,10px) rotate(-30deg)}70%{opacity:1}80%{transform:translate(14px,-18px) rotate(10deg);opacity:1}92%{transform:translate(28px,6px) rotate(50deg);opacity:0}100%{opacity:0}}
+  .beam{animation:beam 3.5s linear infinite}
+  @keyframes beam{0%,100%{opacity:0}20%,45%{opacity:.6}60%{opacity:0}}
+  .gem{cursor:pointer;transition:opacity .3s}
+  .gem .halo{animation:pulse 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes pulse{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2.1);opacity:0}}
+  .gem .body{transition:transform .2s;transform-box:fill-box;transform-origin:center}
+  .gem:hover .body,.gem:active .body{transform:scale(1.25)}
+  .gem.dim{opacity:.12;pointer-events:none}
+  .lbl{font-family:'Baloo Thambi 2';font-weight:800;font-size:10.5px;fill:var(--ink);paint-order:stroke;stroke:var(--parch);stroke-width:3.4px;stroke-linejoin:round;pointer-events:none}
+  .city{font-family:'Cinzel Decorative';font-weight:900;font-size:15px;fill:#7a3fbf;paint-order:stroke;stroke:var(--parch);stroke-width:4px;letter-spacing:.06em}
+  .sea-lbl{font-family:'Cinzel Decorative';font-weight:700;font-size:13px;fill:#bfeaff;letter-spacing:.3em;opacity:.8}
+
+  /* list */
+  .sec{padding:18px 14px 4px}
+  .sec h2{font-family:'Cinzel Decorative';font-size:19px;margin:0 4px 10px;display:flex;align-items:center;gap:8px}
+  .sec h2 .dot{width:12px;height:12px;transform:rotate(45deg);border-radius:2px;box-shadow:0 0 10px currentColor}
+  .card{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;padding:10px 12px;margin-bottom:9px;cursor:pointer;backdrop-filter:blur(4px);transition:transform .15s}
+  .card:active{transform:scale(.98)}
+  .card .ic{flex:0 0 40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px}
+  .card .t{font-family:'Baloo Thambi 2';font-weight:800;font-size:16px;line-height:1.1}
+  .card .d{font-size:13px;opacity:.72;line-height:1.25}
+  .card .tag{font-size:10px;font-weight:600;background:var(--gold);color:var(--ink);padding:1px 7px;border-radius:8px;margin-left:6px;vertical-align:2px}
+  .card .chev{margin-left:auto;opacity:.5;font-size:20px}
+
+  .journey{margin:14px 14px 10px;border-radius:22px;padding:16px;background:linear-gradient(160deg,#3a2a7a,#1d1748);border:1px solid rgba(255,215,122,.35)}
+  .journey h2{font-family:'Cinzel Decorative';font-size:19px;color:var(--gold);margin-bottom:10px}
+  .journey ol{list-style:none;padding-left:22px;position:relative}
+  .journey ol::before{content:"";position:absolute;left:7px;top:6px;bottom:8px;border-left:2px dashed rgba(255,215,122,.5)}
+  .journey li{position:relative;margin-bottom:10px;font-size:14px;line-height:1.35}
+  .journey li::before{content:"✦";position:absolute;left:-22px;top:-1px;color:var(--gold);font-size:15px;text-shadow:0 0 8px var(--gold)}
+  .journey b{font-family:'Baloo Thambi 2';font-size:15px;display:block;color:#fff}
+
+  footer{padding:10px 20px 34px;font-size:12px;opacity:.6;text-align:center;line-height:1.45}
+
+  /* sheet */
+  .scrim{position:fixed;inset:0;background:rgba(8,6,24,.6);opacity:0;pointer-events:none;transition:opacity .25s;z-index:10}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;transform:translate(-50%,105%);transition:transform .38s cubic-bezier(.2,1.2,.4,1);z-index:11;
+    background:linear-gradient(180deg,#2a2163,#16113a);border-top:2px solid #ffd77a;border-radius:28px 28px 0 0;padding:10px 20px 28px;max-height:84vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(155,107,255,.35);visibility:hidden;transition:transform .38s cubic-bezier(.2,1.2,.4,1),visibility 0s .4s}
+  .sheet.on{transform:translate(-50%,0);visibility:visible;transition:transform .38s cubic-bezier(.2,1.2,.4,1)}
+  .grab{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.3);margin:0 auto 12px}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 11px;border-radius:20px;color:var(--ink)}
+  .sheet h3{font-family:'Cinzel Decorative';font-weight:900;font-size:24px;line-height:1.15;margin:10px 0 4px;color:#fff6d8}
+  .where{font-size:13px;opacity:.7;margin-bottom:10px}
+  .sheet p{font-size:15px;line-height:1.5;margin-bottom:12px;opacity:.95}
+  .tip{background:rgba(63,214,224,.12);border-left:3px solid var(--aqua);border-radius:10px;padding:9px 12px;font-size:14px;line-height:1.4;margin-bottom:14px}
+  .tip b{color:var(--aqua)}
+  .btn{display:block;text-align:center;text-decoration:none;width:100%;border:0;border-radius:16px;padding:13px;font-family:'Baloo Thambi 2';font-weight:800;font-size:17px;
+    color:var(--ink);background:linear-gradient(180deg,#ffe08a,#ffc845);box-shadow:0 4px 0 #b9862a,0 0 20px rgba(255,200,69,.35);cursor:pointer;margin-bottom:10px}
+  .btn.ghost{background:transparent;color:var(--cream);border:1.5px solid rgba(255,255,255,.3);box-shadow:none}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="app">
+  <header class="z">
+    <div class="moon"></div>
+    <div class="kicker">Tamil Nadu: The Quest</div>
+    <h1>The Enchanted Coast</h1>
+    <div class="route">East Coast Road · <b>Chennai → Puducherry</b></div>
+    <div class="tamil">கிழக்கு கடற்கரை சாலை</div>
+  </header>
+
+  <nav class="filters z" id="filters"></nav>
+
+  <div class="map-wrap z">
+    <svg class="map" id="map" viewBox="0 0 400 1500" role="img" aria-label="Storybook map of East Coast Road from Chennai to Puducherry">
+      <defs>
+        <linearGradient id="seaG" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#1b4f8f"/><stop offset=".5" stop-color="#1a2f6e"/><stop offset="1" stop-color="#151747"/></linearGradient>
+        <radialGradient id="landG" cx=".3" cy=".5" r=".9"><stop offset="0" stop-color="#fbefcf"/><stop offset="1" stop-color="#ecd29a"/></radialGradient>
+        <linearGradient id="roadG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".5" stop-color="#ffc845"/><stop offset="1" stop-color="#ffe9a8"/></linearGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <pattern id="grain" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1" fill="#d8b878" opacity=".5"/><circle cx="12" cy="11" r=".8" fill="#d8b878" opacity=".4"/></pattern>
+        <g id="palm"><path d="M0 0q2-12 0-22" stroke="#7a5230" stroke-width="2.6" fill="none" stroke-linecap="round"/><g fill="#4f9a5a"><path d="M0-22q-12-3-17 5q8-7 17-5z"/><path d="M0-22q12-3 17 5q-8-7-17-5z"/><path d="M0-22q-7-10-15-8q8 2 15 8z"/><path d="M0-22q7-10 15-8q-8 2-15 8z"/></g></g>
+        <g id="tree"><circle r="9" fill="#5fae6b"/><circle cx="-6" cy="3" r="6" fill="#4f9a5a"/><circle cx="6" cy="4" r="6" fill="#4f9a5a"/></g>
+        <g id="castle"><rect x="-16" y="-14" width="32" height="18" fill="#c9a7ff"/><rect x="-20" y="-24" width="9" height="28" fill="#b48cf5"/><rect x="11" y="-24" width="9" height="28" fill="#b48cf5"/><path d="M-21-24l5.5-9l5.5 9zM10-24l5.5-9l5.5 9z" fill="#7a3fbf"/><rect x="-5" y="-26" width="10" height="12" fill="#b48cf5"/><path d="M-6-26l6-10l6 10z" fill="#7a3fbf"/><path d="M-4 4v-8a4 4 0 0 1 8 0v8z" fill="#5b2c91"/><circle cx="15.5" cy="-36" r="1.6" fill="#ffc845" class="spark"/></g>
+      </defs>
+
+      <!-- land -->
+      <rect width="400" height="1500" fill="url(#landG)"/>
+      <rect width="400" height="1500" fill="url(#grain)"/>
+
+      <!-- backwaters, lakes, salt pans -->
+      <path d="M120 330c20-12 50-8 60 6c8 14-8 30-34 30c-26 0-44-20-26-36z" fill="#7fd6e6" stroke="#5bbad0" stroke-width="2"/>
+      <path d="M110 965c22-14 55-10 64 6c8 16-10 32-36 30c-28-2-46-20-28-36z" fill="#7fd6e6" stroke="#5bbad0" stroke-width="2"/>
+      <path d="M190 1030c25-10 60 0 70 10l20-4c-20 18-60 22-90 10z" fill="#7fd6e6" opacity=".8"/>
+      <g transform="translate(70 1100)" opacity=".9">
+        <rect width="34" height="18" fill="#f4fbff" stroke="#bcdcea"/><rect x="38" width="34" height="18" fill="#eaf6ff" stroke="#bcdcea"/><rect x="76" width="34" height="18" fill="#f4fbff" stroke="#bcdcea"/>
+        <rect y="22" width="34" height="18" fill="#eaf6ff" stroke="#bcdcea"/><rect x="38" y="22" width="34" height="18" fill="#f4fbff" stroke="#bcdcea"/><rect x="76" y="22" width="34" height="18" fill="#eaf6ff" stroke="#bcdcea"/>
+        <path d="M14 4l4 8h-8zM52 26l4 8h-8zM90 4l4 8h-8z" fill="#fff"/>
+      </g>
+      <!-- Buckingham canal ribbon -->
+      <path d="M262 60C255 300 250 520 258 760S245 1150 258 1460" stroke="#9fdbe8" stroke-width="3" fill="none" stroke-dasharray="2 6" opacity=".9"/>
+
+      <!-- greenery -->
+      <g>
+        <use href="#palm" x="60" y="150"/><use href="#palm" x="78" y="162"/><use href="#tree" x="40" y="260"/><use href="#palm" x="90" y="440"/>
+        <use href="#tree" x="60" y="540"/><use href="#palm" x="40" y="640"/><use href="#palm" x="58" y="650"/><use href="#tree" x="100" y="820"/>
+        <use href="#palm" x="50" y="900"/><use href="#tree" x="40" y="1200"/><use href="#tree" x="64" y="1215"/><use href="#tree" x="52" y="1235"/>
+        <use href="#palm" x="70" y="1400"/><use href="#palm" x="90" y="1410"/><use href="#tree" x="120" y="740"/><use href="#palm" x="150" y="1180"/>
+      </g>
+
+      <!-- sea -->
+      <path id="coast" d="M290 0C280 120 300 220 288 330S302 520 292 640S300 820 290 940S302 1150 290 1270S300 1420 296 1500L400 1500L400 0Z" fill="url(#seaG)"/>
+      <path d="M290 0C280 120 300 220 288 330S302 520 292 640S300 820 290 940S302 1150 290 1270S300 1420 296 1500" stroke="#fff3cf" stroke-width="7" fill="none"/>
+      <path d="M290 0C280 120 300 220 288 330S302 520 292 640S300 820 290 940S302 1150 290 1270S300 1420 296 1500" stroke="#7ff3ff" stroke-width="2" fill="none" filter="url(#glow)" class="wv s"/>
+      <g stroke="#7ff3ff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7" filter="url(#glow)">
+        <path class="wv" d="M315 90q10-7 20 0t20 0t20 0"/><path class="wv s" d="M325 250q10-7 20 0t20 0"/>
+        <path class="wv" d="M318 420q10-7 20 0t20 0t20 0"/><path class="wv s" d="M330 600q10-7 20 0t20 0"/>
+        <path class="wv" d="M315 800q10-7 20 0t20 0t20 0"/><path class="wv s" d="M325 990q10-7 20 0t20 0"/>
+        <path class="wv" d="M318 1180q10-7 20 0t20 0t20 0"/><path class="wv s" d="M330 1360q10-7 20 0t20 0"/>
+      </g>
+      <g fill="#fff">
+        <circle class="spark" cx="340" cy="160" r="1.4"/><circle class="spark" cx="372" cy="340" r="1.2" style="animation-delay:-1s"/>
+        <circle class="spark" cx="330" cy="520" r="1.5" style="animation-delay:-.4s"/><circle class="spark" cx="380" cy="720" r="1.2" style="animation-delay:-1.6s"/>
+        <circle class="spark" cx="345" cy="900" r="1.4" style="animation-delay:-.8s"/><circle class="spark" cx="370" cy="1080" r="1.2" style="animation-delay:-2s"/>
+        <circle class="spark" cx="335" cy="1270" r="1.5" style="animation-delay:-1.2s"/><circle class="spark" cx="375" cy="1440" r="1.3"/>
+      </g>
+      <text class="sea-lbl" x="358" y="760" text-anchor="middle" transform="rotate(90 358 760)">✦ BAY OF BENGAL ✦</text>
+
+      <!-- friendly sea serpent -->
+      <g class="serp" transform="translate(320 470)">
+        <path d="M0 14c6-22 22-22 28 0" stroke="#3fd6e0" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M34 14c5-16 17-16 22 0" stroke="#3fd6e0" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M-4 14c-2-18 -4-28 4-34c8-6 18 0 16 8" stroke="#3fd6e0" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <circle cx="8" cy="-22" r="2.6" fill="#120e2e"/><circle cx="8.8" cy="-22.8" r=".9" fill="#fff"/>
+        <path d="M0-30l-4-8l6 4zM6-32l0-9l4 7z" fill="#9b6bff"/>
+        <path d="M-10 16h70" stroke="#7ff3ff" stroke-width="1.5" opacity=".7"/>
+      </g>
+      <!-- whale -->
+      <g class="serp" style="animation-duration:7s" transform="translate(330 1110)">
+        <path d="M0 0c0-14 30-18 44-6c4-6 10-8 14-6c-4 4-6 8-6 12c-14 10-46 10-52 0z" fill="#6a7dd6"/>
+        <circle cx="10" cy="-4" r="1.8" fill="#120e2e"/>
+        <path d="M14-14c-2-8 0-12 4-14M14-14c2-8 6-10 10-10" stroke="#bfeaff" stroke-width="1.6" fill="none" class="spark"/>
+      </g>
+      <!-- jumping fish -->
+      <g class="fish" transform="translate(320 300)"><path d="M0 0q8-6 16 0q-8 6-16 0zm16 0l6-5v10z" fill="#ff9a6b"/></g>
+      <g class="fish" style="animation-delay:-2s" transform="translate(330 860)"><path d="M0 0q8-6 16 0q-8 6-16 0zm16 0l6-5v10z" fill="#ffc845"/></g>
+      <!-- sailboat -->
+      <g class="serp" style="animation-duration:4s" transform="translate(345 1320)">
+        <path d="M-14 0h28l-5 7h-18z" fill="#ff7a59"/><path d="M0 0v-22l12 18z" fill="#fffaf0"/><path d="M0-2v-18l-9 14z" fill="#ffc845"/>
+      </g>
+
+      <!-- golden road -->
+      <path id="road" d="M242 20C236 140 252 220 236 330S246 520 240 640S250 820 236 940S248 1150 238 1270S244 1420 240 1490" stroke="#fff6dc" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M242 20C236 140 252 220 236 330S246 520 240 640S250 820 236 940S248 1150 238 1270S244 1420 240 1490" stroke="url(#roadG)" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+      <path d="M242 20C236 140 252 220 236 330S246 520 240 640S250 820 236 940S248 1150 238 1270S244 1420 240 1490" stroke="#fff" stroke-width="1.4" fill="none" stroke-dasharray="6 10" class="wv s" opacity=".9"/>
+      <!-- travelling carriage -->
+      <g filter="url(#glow)">
+        <g>
+          <circle r="6" fill="#ff7a59" stroke="#fff" stroke-width="2"/><circle r="2" fill="#fff"/>
+          <animateMotion dur="40s" repeatCount="indefinite" rotate="0"><mpath href="#road"/></animateMotion>
+        </g>
+      </g>
+
+      <!-- landmarks art -->
+      <g transform="translate(150 70)"><use href="#castle"/></g>
+      <text class="city" x="150" y="105" text-anchor="middle">CHENNAI</text>
+      <!-- Mamallapuram temple -->
+      <g transform="translate(58 742)">
+        <path d="M-24 14h48v-6h-48z" fill="#9c6b45"/><path d="M-14 8l5-30h18l5 30z" fill="#d79a62"/><path d="M-8-22l4-14h8l4 14z" fill="#c4834f"/><path d="M-2-36l2-8l2 8z" fill="#7a3fbf"/>
+        <path d="M12 8l3-16h8l3 16z" fill="#d79a62"/><path d="M15-8l4-8l4 8z" fill="#7a3fbf"/>
+        <circle cx="0" cy="-44" r="4" fill="#ffc845" class="spark" filter="url(#glow)"/>
+      </g>
+      <text class="city" x="92" y="782" text-anchor="middle" style="font-size:12.5px">MAMALLAPURAM</text>
+      <!-- Sadras fort -->
+      <g transform="translate(150 905)"><rect x="-18" y="-10" width="36" height="14" fill="#c98f5c"/><path d="M-18-10v-5h5v5h4v-5h5v5h4v-5h5v5h4v-5h5v5" fill="none" stroke="#a46a3e" stroke-width="2.4"/></g>
+      <!-- Alamparai ruins -->
+      <g transform="translate(140 1060)"><path d="M-18 6v-14h6v6h4v-10h6v18z" fill="#b98a62"/><path d="M4 6v-8h5v4h4v-8h5v12z" fill="#a8774c"/></g>
+      <!-- Auroville orb -->
+      <g transform="translate(140 1258)"><circle r="13" fill="#ffd36b" filter="url(#glow)"/><circle r="13" fill="none" stroke="#e0a33a" stroke-width="1.5"/><path d="M-13 0h26M0-13v26M-9-9l18 18M9-9l-18 18" stroke="#e0a33a" stroke-width=".8" opacity=".6"/></g>
+      <!-- Pondy: lighthouse + castle -->
+      <g transform="translate(150 1305)">
+        <path class="beam" d="M0-28L70-48v34z" fill="#fff3b0"/>
+        <path d="M-5 10l2-38h6l2 38z" fill="#fffaf0" stroke="#7a3fbf" stroke-width="1.4"/><path d="M-4 0h8M-3-12h6" stroke="#ff7a59" stroke-width="3.5"/>
+        <rect x="-4" y="-32" width="8" height="6" fill="#ffc845"/><path d="M-5-32l5-5l5 5z" fill="#7a3fbf"/>
+      </g>
+      <g transform="translate(75 1385)"><use href="#castle"/></g>
+      <text class="city" x="85" y="1422" text-anchor="middle">PUDUCHERRY</text>
+
+      <!-- balloon & lanterns -->
+      <g class="balloon"><g transform="translate(70 360)">
+        <path d="M0-26c-14 0-20 12-14 24l10 10h8l10-10c6-12 0-24-14-24z" fill="#9b6bff"/><path d="M0-26c-5 0-7 12-5 24l3 10h4l3-10c2-12 0-24-5-24z" fill="#ffc845"/>
+        <path d="M-4 8l1 6M4 8l-1 6" stroke="#7a5230" stroke-width="1"/><rect x="-4" y="14" width="8" height="6" rx="1" fill="#a8774c"/>
+      </g></g>
+      <g class="balloon" style="animation-duration:28s;animation-delay:-9s"><g transform="translate(60 1000)">
+        <path d="M0-20c-11 0-16 9-11 19l8 8h6l8-8c5-10 0-19-11-19z" fill="#ff7a59"/><path d="M0-20c-4 0-5 9-4 19l2 8h4l2-8c1-10 0-19-4-19z" fill="#fff6dc"/>
+        <rect x="-3" y="11" width="6" height="5" rx="1" fill="#a8774c"/>
+      </g></g>
+      <g fill="#ffb347" filter="url(#glow)">
+        <rect class="lantern" x="120" y="620" width="6" height="8" rx="2"/>
+        <rect class="lantern" x="200" y="800" width="6" height="8" rx="2" style="animation-delay:-3s"/>
+        <rect class="lantern" x="90" y="1180" width="6" height="8" rx="2" style="animation-delay:-6s"/>
+        <rect class="lantern" x="180" y="1460" width="6" height="8" rx="2" style="animation-delay:-4.5s"/>
+        <rect class="lantern" x="170" y="260" width="6" height="8" rx="2" style="animation-delay:-1.5s"/>
+      </g>
+
+      <!-- compass rose -->
+      <g transform="translate(46 40)">
+        <circle r="22" fill="#fff6dc" stroke="#7a3fbf" stroke-width="2"/>
+        <path d="M0-19l5 19l-5-4l-5 4z" fill="#7a3fbf"/><path d="M0 19l5-19l-5 4l-5-4z" fill="#d8b878"/>
+        <path d="M-19 0l19-4v8z" fill="#d8b878" opacity=".6"/><path d="M19 0l-19-4v8z" fill="#d8b878" opacity=".6"/>
+        <text y="-26" text-anchor="middle" class="lbl" style="font-size:10px">N</text>
+      </g>
+
+      <g id="gems"></g>
+    </svg>
+  </div>
+  <div class="hint z">✦ Tap a glowing gem to open its story ✦</div>
+
+  <div id="lists" class="z"></div>
+
+  <section class="journey z">
+    <h2>A two-day coast quest</h2>
+    <ol>
+      <li><b>Day 1 · Morning</b>Start at Cholamandal Artists' Village, then step into old South India at DakshinaChitra.</li>
+      <li><b>Day 1 · Afternoon</b>Paddle at Muttukadu Boat House, meet the crocs at Crocodile Bank, and catch the waves at Kovalam.</li>
+      <li><b>Day 1 · Evening</b>Reach Mamallapuram for sunset at the Shore Temple and a seafood dinner. Stay the night.</li>
+      <li><b>Day 2 · Morning</b>Drive south past Sadras Dutch Fort and the backwaters of Alamparai Fort.</li>
+      <li><b>Day 2 · Afternoon</b>Watch the shimmering salt pans of Marakkanam, then visit Auroville.</li>
+      <li><b>Day 2 · Evening</b>End on the Promenade in Puducherry with a stroll through the French quarter.</li>
+    </ol>
+  </section>
+
+  <footer class="z">
+    <strong>A sample concept by DIGENIE</strong> for the Tamil Nadu: The Quest proposal.<br>
+    Storybook map, not to scale. Listings are illustrative examples, not endorsements. Please check timings, entry rules and bookings before you travel.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <span class="badge" id="sBadge"></span>
+  <h3 id="sTitle"></h3>
+  <div class="where" id="sWhere"></div>
+  <p id="sText"></p>
+  <div class="tip" id="sTip"></div>
+  <div id="sExtra"></div>
+  <button class="btn ghost" id="sClose">Back to the map</button>
+</div>
+
+<script>
+const CAT={
+  sight:{name:'Sights',one:'Sight',color:'#9b6bff',icon:'🏰'},
+  beach:{name:'Beaches',one:'Beach',color:'#3fd6e0',icon:'🌊'},
+  food:{name:'Food spots',one:'Food spot',color:'#ff7a59',icon:'🍤'},
+  stay:{name:'Stays',one:'Stay',color:'#ffc845',icon:'🛏️'}
+};
+const MAMALLA='https://avinash-vijay02.github.io/mamallapuram/';
+const P=[
+ {c:'sight',x:200,y:128,n:'Cholamandal Artists\' Village',lb:'Cholamandal',w:'Injambakkam',d:'A leafy artists\' commune with galleries, sculpture and studios.',t:'One of India\'s best-known artists\' villages, where painters and sculptors live and work together. Wander the open-air sculptures and the gallery of contemporary South Indian art.',tip:'<b>Tip:</b> a calm first stop before the coastal traffic picks up.'},
+ {c:'food',x:215,y:158,n:'Thoondil',w:'Chennai end of ECR',d:'Live seafood, cooked the way you like.',t:'A popular ECR seafood restaurant known for picking your catch and having it cooked to order, from tawa fries to Chettinad-style curries.',tip:'<b>Try:</b> the prawn tawa fry.'},
+ {c:'food',x:205,y:188,n:'Kipling Cafe',w:'Akkarai',d:'Coastal fine dining in a garden setting.',t:'A long-running ECR favourite for seafood and relaxed meals in a breezy, garden-style space.',tip:'<b>Tip:</b> reserve for evenings and weekends.'},
+ {c:'beach',x:284,y:212,n:'Akkarai Beach',lb:'Akkarai Beach',w:'Akkarai',d:'Quiet stretch of sand just outside the city.',t:'Less crowded than the city beaches, with wide sand and fishing boats. A good place to see the sun rise over the Bay of Bengal.',tip:'<b>Safety:</b> the sea can be rough, enjoy it from the shore.'},
+ {c:'sight',x:215,y:245,n:'VGP Universal Kingdom',lb:'VGP Universal Kingdom',w:'Injambakkam',d:'Classic amusement park for families.',t:'One of Chennai\'s oldest amusement parks, with rides, shows and a water park area, right on the coast.',tip:'<b>Tip:</b> go early on weekends to beat the queues.'},
+ {c:'sight',x:200,y:295,n:'DakshinaChitra',w:'Muttukadu',d:'Living museum of South Indian homes and crafts.',t:'Walk through real traditional houses rebuilt from across South India, watch craft demonstrations and browse handmade art. It feels like stepping into another century.',tip:'<b>Tip:</b> check the weekly closing day before you go.'},
+ {c:'stay',x:220,y:322,n:'MGM Beach Resorts',lb:'MGM Beach Resorts',w:'Muttukadu',d:'Beachfront family resort.',t:'A beach resort on ECR with pools, lawns and sea views, popular for weekend family getaways.',tip:'<b>Tip:</b> book ahead for festival weekends.'},
+ {c:'sight',x:150,y:352,n:'Muttukadu Boat House',lb:'Muttukadu Boat House',w:'Muttukadu backwaters · TTDC',ttdc:1,d:'Boating on the backwaters, run by TTDC.',t:'A Tamil Nadu Tourism (TTDC) boat house on the Muttukadu backwaters. Take a rowing, pedal or motor boat out onto the calm water, a favourite family outing on ECR.',tip:'<b>Best time:</b> late afternoon, when the light turns golden.'},
+ {c:'beach',x:284,y:402,n:'Kovalam (Covelong) Beach',lb:'Kovalam Beach',w:'Kovalam',d:'Surfing waves and a fishing village.',t:'A fishing village beach that has become Chennai\'s surf spot. Watch surfers ride the waves or book a beginner lesson with a local surf school.',tip:'<b>Try:</b> a beginner surf session in the morning.'},
+ {c:'stay',x:225,y:428,n:'Taj Fisherman\'s Cove Resort & Spa',lb:'Taj Fisherman\'s Cove',w:'Covelong Beach',d:'Luxury resort on its own private beach.',t:'A well-known luxury beach resort at Covelong with cottages, pools and a private stretch of beach.',tip:'<b>Tip:</b> great for a slow sunrise breakfast.'},
+ {c:'sight',x:205,y:478,n:'Madras Crocodile Bank',lb:'Crocodile Bank',w:'Vadanemmeli',d:'Crocodiles, turtles and snakes up close.',t:'A reptile conservation centre and zoo with many species of crocodiles, alligators, turtles and snakes. A big hit with children.',tip:'<b>Tip:</b> visit in the cooler morning hours, the reptiles are more active.'},
+ {c:'stay',x:220,y:515,n:'InterContinental Chennai Mahabalipuram Resort',lb:'InterContinental',w:'Nemmeli',d:'Beachfront luxury resort.',t:'A luxury beach resort on ECR between Chennai and Mamallapuram, home to the Kokommo beach shack and other restaurants.',tip:'<b>Tip:</b> non-guests can usually visit the restaurants, call ahead.'},
+ {c:'food',x:205,y:545,n:'Kokommo Beach Shack',lb:'Kokommo',w:'Nemmeli (InterContinental)',d:'Seaside shack with coastal bites.',t:'A beach shack inside the InterContinental resort serving coastal food, seafood platters and sunset drinks by the sand.',tip:'<b>Best time:</b> evenings, it opens in the afternoon.'},
+ {c:'stay',x:215,y:578,n:'Welcomhotel Kences Palm Beach',lb:'Kences Palm Beach',w:'Devaneri, near Mamallapuram',d:'Resort close to the monuments.',t:'An ITC-run resort on ECR just north of Mamallapuram, convenient for early starts at the monuments.',tip:'<b>Tip:</b> a handy base for a two-day trip.'},
+ {c:'sight',x:270,y:612,n:'Tiger Cave',lb:'Tiger Cave',w:'Saluvankuppam',d:'Rock shrine crowned with tiger-like heads.',t:'A Pallava-era rock-cut shrine framed by a ring of carved yali heads, set among rocks by the sea a few kilometres north of Mamallapuram.',tip:'<b>Best time:</b> late afternoon, quieter and cooler.'},
+ {c:'stay',x:220,y:650,n:'Radisson Blu Resort Temple Bay',lb:'Radisson Blu Temple Bay',w:'Mamallapuram',d:'Beach resort facing the Shore Temple.',t:'A large beach resort on the Mamallapuram shore, within easy reach of the Shore Temple and town.',tip:'<b>Tip:</b> walk to the Shore Temple at sunrise.'},
+ {c:'sight',x:200,y:692,n:'Mamallapuram Monuments',lb:'Mamallapuram Monuments',w:'Mamallapuram · UNESCO World Heritage',d:'Shore Temple, Pancha Rathas, Arjuna\'s Penance and more.',t:'The heart of the coast: a UNESCO World Heritage group of Pallava temples, rock-cut caves and giant reliefs. Open our full Heritage Quest to explore all 10 stops and collect stamps.',tip:'<b>Best time:</b> sunrise at the Shore Temple.',link:[MAMALLA,'Open the Mamallapuram Heritage Quest ✦']},
+ {c:'beach',x:290,y:722,n:'Mamallapuram Beach',lb:'Mamallapuram Beach',w:'Mamallapuram',d:'Golden sand beside the Shore Temple.',t:'Fishing boats, sea breeze and the Shore Temple in view. Walk the shore and watch the fishermen bring in the catch.',tip:'<b>Safety:</b> strong currents, swimming is not advised.'},
+ {c:'food',x:262,y:752,n:'Moonrakers',w:'Mamallapuram',d:'Classic seafood spot in town.',t:'One of Mamallapuram\'s best-known seafood restaurants, a favourite with travellers for the fresh catch of the day.',tip:'<b>Try:</b> grilled fish of the day.'},
+ {c:'stay',x:215,y:815,n:'TTDC Hotel Tamil Nadu Beach Resort',lb:'TTDC Beach Resort',w:'Mamallapuram · TTDC',ttdc:1,d:'Tamil Nadu Tourism\'s own beach stay.',t:'TTDC\'s beach resort complex at Mamallapuram, a government-run stay close to the monuments and the sea. A natural starting point for the "Stay-to-Explore" idea.',tip:'<b>Book:</b> through the official Tamil Nadu Tourism website.'},
+ {c:'sight',x:205,y:880,n:'Sadras Dutch Fort',lb:'Sadras Dutch Fort',w:'Sadras, near Kalpakkam',d:'Ruins of a 17th-century Dutch trading fort.',t:'The Dutch set up a trading post here in the 1600s. Today you can explore the old walls, a granary and a cemetery with carved tombstones.',tip:'<b>Tip:</b> look for the old Dutch tombstones.'},
+ {c:'sight',x:150,y:990,n:'Mudaliarkuppam Boat House',lb:'Mudaliarkuppam Boat House',w:'Backwaters near Kadappakkam · TTDC',ttdc:1,d:'Peaceful backwater boating, run by TTDC.',t:'A quieter TTDC boat house on the southern backwaters of ECR. Glide out over still water with birds, palms and open sky.',tip:'<b>Tip:</b> a calm break on the drive to Puducherry.'},
+ {c:'sight',x:200,y:1040,n:'Alamparai Fort',lb:'Alamparai Fort',w:'Kadappakkam',d:'Sea-side fort ruins by a backwater lagoon.',t:'The romantic ruins of a 17th–18th century fort that once guarded a busy port. Brick walls crumble beside a lagoon that opens into the sea, a favourite spot for photographers.',tip:'<b>Note:</b> parts of the ruins are fenced off for safety. Admire from outside.'},
+ {c:'sight',x:200,y:1110,n:'Marakkanam Salt Pans',lb:'Marakkanam Salt Pans',w:'Marakkanam',d:'Glittering fields of sea salt.',t:'Wide, shining salt pans stretch beside the road, with workers raking white mounds of salt. A surreal, mirror-like landscape at sunrise or sunset.',tip:'<b>Tip:</b> photograph from the roadside, please don\'t walk on the pans.'},
+ {c:'sight',x:175,y:1230,n:'Auroville',w:'Near Puducherry',d:'International township and the golden Matrimandir.',t:'An experimental township with forests, cafés and craft shops. The golden globe of the Matrimandir can be seen from the viewing point after a short walk.',tip:'<b>Tip:</b> start at the Visitors Centre for passes and directions.'},
+ {c:'beach',x:286,y:1262,n:'Serenity Beach',lb:'Serenity Beach',w:'Kottakuppam, near Puducherry',d:'Surf, cafés and a rocky shore.',t:'A laid-back beach just north of Puducherry, popular for surfing lessons and beachside cafés.',tip:'<b>Try:</b> a sunset walk along the rocks.'},
+ {c:'beach',x:290,y:1318,n:'Promenade Beach & White Town',lb:'Promenade Beach',w:'Puducherry',d:'Seafront walk beside the French quarter.',t:'Puducherry\'s famous seafront promenade, lined with colonial buildings. Behind it, the yellow and white streets of the French quarter are perfect for a slow evening stroll.',tip:'<b>Best time:</b> early morning or evening, when it\'s car-free in parts.'},
+ {c:'food',x:220,y:1352,n:'French Quarter Cafés',lb:'White Town Cafés',w:'Puducherry',d:'Croissants, crêpes and Tamil-French flavours.',t:'Puducherry\'s White Town is full of small cafés and bakeries mixing French and Tamil flavours, from fresh bread to coastal curries.',tip:'<b>Try:</b> a filter coffee and a croissant, the perfect Pondy combo.'},
+ {c:'stay',x:215,y:1385,n:'The Promenade',lb:'The Promenade Hotel',w:'Puducherry',d:'Seafront hotel on the Promenade.',t:'A hotel right on Puducherry\'s seafront, steps from the French quarter.',tip:'<b>Tip:</b> sea-facing rooms are worth asking for.'},
+ {c:'beach',x:290,y:1435,n:'Paradise Beach',lb:'Paradise Beach',w:'Chunnambar, near Puducherry',d:'Island beach reached by boat.',t:'A golden sandbar beach reached by a short boat ride along the Chunnambar backwaters. Clean sand, clear water and a real island feel.',tip:'<b>Tip:</b> check the last boat back before you settle in.'}
+];
+
+// stars
+const st=document.getElementById('stars');
+for(let i=0;i<70;i++){const s=document.createElement('i');s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+  s.style.animationDelay=(-Math.random()*3)+'s';s.style.opacity=.5;if(Math.random()<.2){s.style.width=s.style.height='3px'}st.appendChild(s)}
+
+const NS='http://www.w3.org/2000/svg';
+const gems=document.getElementById('gems');
+P.forEach((p,i)=>{
+  p.i=i; const col=CAT[p.c].color;
+  const g=document.createElementNS(NS,'g'); g.setAttribute('class','gem'); g.dataset.c=p.c;
+  g.setAttribute('transform',`translate(${p.x} ${p.y})`);
+  const lab=(p.lb||p.n);
+  const right = p.x<170;
+  g.innerHTML=`<circle class="halo" r="8" fill="${col}" style="animation-delay:${-(i%7)*.33}s"/>
+    <g class="body"><path d="M0-10L9 0L0 10L-9 0Z" fill="${col}" stroke="#fff" stroke-width="2" filter="url(#glow)"/>
+    <path d="M0-10L9 0L0 0Z" fill="#fff" opacity=".35"/></g>
+    <text class="lbl" x="${right?14:-14}" y="4" text-anchor="${right?'start':'end'}">${lab}</text>
+    <rect x="-16" y="-16" width="32" height="32" fill="transparent"/>`;
+  g.addEventListener('click',()=>open(i));
+  gems.appendChild(g);
+});
+
+// filters
+let active='all';
+const F=document.getElementById('filters');
+const counts={all:P.length};P.forEach(p=>counts[p.c]=(counts[p.c]||0)+1);
+[['all','All',null],...Object.entries(CAT).map(([k,v])=>[k,v.name,v.color])].forEach(([k,label,col])=>{
+  const b=document.createElement('button');b.className='chipf'+(k==='all'?' on':'');b.dataset.k=k;
+  b.innerHTML=(col?`<span class="dot" style="background:${col}"></span>`:'✦ ')+label+` <small>${counts[k]}</small>`;
+  b.onclick=()=>{active=k;document.querySelectorAll('.chipf').forEach(x=>x.classList.toggle('on',x.dataset.k===k));
+    document.querySelectorAll('.gem').forEach(g=>g.classList.toggle('dim',k!=='all'&&g.dataset.c!==k));
+    document.querySelectorAll('.sec').forEach(s=>s.style.display=(k==='all'||s.dataset.c===k)?'':'none');};
+  F.appendChild(b);
+});
+
+// lists
+const L=document.getElementById('lists');
+Object.entries(CAT).forEach(([k,v])=>{
+  const s=document.createElement('section');s.className='sec';s.dataset.c=k;
+  s.innerHTML=`<h2 style="color:${v.color}"><span class="dot" style="background:${v.color}"></span><span style="color:#fff">${v.name}</span></h2>`;
+  P.filter(p=>p.c===k).forEach(p=>{
+    const d=document.createElement('div');d.className='card';
+    d.innerHTML=`<div class="ic" style="background:${v.color}26">${v.icon}</div><div><div class="t">${p.n}${p.ttdc?'<span class="tag">TTDC</span>':''}</div><div class="d">${p.w} · ${p.d}</div></div><div class="chev">›</div>`;
+    d.onclick=()=>open(p.i);s.appendChild(d);
+  });
+  L.appendChild(s);
+});
+
+// sheet
+const $=id=>document.getElementById(id);
+function open(i){
+  const p=P[i],c=CAT[p.c];
+  $('sBadge').style.background=c.color;$('sBadge').textContent=c.icon+' '+c.one+(p.ttdc?' · TTDC':'');
+  $('sTitle').textContent=p.n;$('sWhere').textContent='📍 '+p.w;$('sText').textContent=p.t;$('sTip').innerHTML=p.tip;
+  $('sExtra').innerHTML=p.link?`<a class="btn" href="${p.link[0]}">${p.link[1]}</a>`:'';
+  $('sheet').scrollTop=0;$('scrim').classList.add('on');$('sheet').classList.add('on');
+}
+function close(){$('scrim').classList.remove('on');$('sheet').classList.remove('on')}
+$('scrim').onclick=close;$('sClose').onclick=close;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+let y0=null;$('sheet').addEventListener('touchstart',e=>{if($('sheet').scrollTop<=0)y0=e.touches[0].clientY},{passive:true});
+$('sheet').addEventListener('touchmove',e=>{if(y0!==null&&e.touches[0].clientY-y0>70){y0=null;close()}},{passive:true});
+</script>
+</body>
+</html>
